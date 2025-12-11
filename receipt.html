@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>3 Copy Receipt</title>
+
+<style>
+  body { 
+    display: flex;
+    justify-content: center;
+    font-family: "Inter", Arial, sans-serif;
+    background:#f7f7f7;
+  }
+
+  /* --- Modern Form Style --- */
+  .form-container {
+    max-width: 520px;
+    background: white;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+  }
+
+  .input-group { margin-bottom: 10px; }
+
+  input[type="text"] {
+    width:93%;
+    padding:3%;
+    margin-top:6px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:14px;
+  }
+
+  .inline { 
+    display:flex; 
+    align-items:center; 
+    gap:10px; 
+    margin-top:8px; 
+    background: #f4f4f4;
+    padding: 2%;
+    border-radius: 5px;
+    box-shadow: 0px 0px 1px 0px #404040;
+  }
+
+  button {
+    margin-top:15px;
+    width:100%;
+    padding:12px;
+    background:#0066ff;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    font-weight:600;
+  }
+
+  /* --- Print Area Hidden on Screen --- */
+  .print-area { display:none; }
+
+  /* --- Receipt styling remains unchanged --- */
+  .receipt {
+    width: 760px;                 /* Reduced width to fit page */
+    margin-bottom:12px;           /* Reduced spacing */
+    font-size:15px;
+    line-height:1.05rem;          /* Tighter lines so 3 fit on a page */
+  }
+
+  .underline { text-decoration: underline; }
+  .row { display:flex; }
+  .left { flex:1; }
+  .right { width:200px; }
+  .signature-block { width:100%; text-align:right; margin-top:20px; }
+  hr.line { border:none; border-top:1px dashed black; margin:15px 0; }
+
+  @media print {
+    .form-container, button { display:none !important; }
+    .print-area { display:block; }
+    body { padding:0; margin:0; }
+  }
+</style>
+
+</head>
+<body>
+
+<!-- -------- Modern Form UI -------- -->
+<div class="form-container">
+  <h2 style="text-align: center;">GENERATE CHALLAN</h2>
+
+  <div class="input-group">
+    <label>Consumer Name</label>
+    <input id="name" type="text" value="Bakhtiar Khan">
+  </div>
+
+  <div class="input-group">
+    <label>Father Name</label>
+    <input id="fname" type="text" value="Fakhr E Alam">
+  </div>
+
+  <div class="input-group">
+    <label>Address</label>
+    <input id="address" type="text" value="Rahim Abad, Mingora Swat">
+  </div>
+
+  <div class="input-group">
+    <label>Amount (Rs.)</label>
+    <input id="amount" type="text" value="1000">
+  </div>
+
+  <div class="input-group">
+    <label>RCO Code / Account Head</label>
+    <input id="rco" type="text" value="SW-5131">
+  </div>
+
+  <!-- Auto Date Checkbox -->
+  <div class="input-group">
+    <label>Date Options</label>  
+    <div class="inline">
+      <input type="checkbox" id="useDate">
+      <span>Insert Today’s Date Automatically</span>
+    </div>
+  </div>
+
+  <!-- Domestic / Commercial / Dispute Radio -->
+  <div class="input-group">
+    <label>Connection Type</label>
+
+    <div class="inline">
+      <input type="radio" name="ctype" value="Initial Inspection fee for Domestic S/P Connection" checked>
+      Domestic
+
+      <input type="radio" name="ctype" value="Initial Inspection fee for Industrial/Commercial Connection">
+      Commercial
+
+      <input type="radio" name="ctype" value="Dispute Fee 1%">
+      Dispute
+    </div>
+  </div>
+
+  <button onclick="generate()">PRINT CHALLAN</button>
+</div>
+
+<!-- PRINT AREA -->
+<div id="printArea" class="print-area"></div>
+
+<script>
+function escapeHTML(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function buildReceipt(fullName, amount, rco, dateText, connType){
+  return `
+    <div class="receipt" style="padding: 10px 80px;">   <!-- reduced padding -->
+
+      <div><strong>TO</strong></div>
+
+      <div class="afterTo" style="padding-left:70px;">
+        <div class="row" style="margin-top:6px;">
+          <div class="left"><strong>THE MANAGER, STATE BANK OF PAKISTAN</strong></div>
+          <div class="right"><strong>PROVINCIAL</strong></div>
+        </div>
+
+        <div style="margin-top:6px;">
+          <strong>DATED: ${dateText}</strong>
+        </div>
+
+        <div style="margin-top:8px;" class="underline"><strong>${fullName}</strong></div>
+
+        <div style="margin-top:10px;">
+          Received from the bearer the sum of Rs.&nbsp; 
+          <span class="underline"><strong>${amount}/-</strong></span><br>
+          to be credited to Government account under the head: 
+          <span class="underline"><strong>B03031-Reciept for fee payable</strong><br>
+          <strong style="margin-left: 290px;">Under the Electricity Rules, 1937</strong></span><br>
+          on account of:&nbsp;
+          <span class="underline"><strong>${connType}</strong></span>
+        </div>
+
+        <div style="margin-top:10px;">
+          <span>RCO Code:</span>
+          &nbsp; <span class="underline"><strong>${rco}</strong></span>
+        </div>
+
+        <div class="signature-block">
+          Signature and full official designation of the<br>
+          Officer ordering the money to be paid in.
+        </div>
+
+        <hr class="line">
+      </div>
+    </div>
+  `;
+}
+
+function generate(){
+  const name = escapeHTML(document.getElementById("name").value.trim());
+  const fname = escapeHTML(document.getElementById("fname").value.trim());
+  const address = escapeHTML(document.getElementById("address").value.trim());
+  const amount = escapeHTML(document.getElementById("amount").value.trim());
+  const rco = escapeHTML(document.getElementById("rco").value.trim());
+
+  const fullName = `${name} s/o ${fname}, ${address}`;
+
+  const connType = document.querySelector('input[name="ctype"]:checked').value;
+
+  // Auto date
+  const useDate = document.getElementById("useDate").checked;
+  const today = new Date();
+  const formatted = 
+        String(today.getDate()).padStart(2,'0') + "/" +
+        String(today.getMonth()+1).padStart(2,'0') + "/" +
+        today.getFullYear();
+
+  const dateText = useDate ? formatted : "____/____/202_";
+
+  // ---------------------------
+  // NEW: Decide number of receipts
+  // ---------------------------
+  let copies = 3;
+
+  if (connType.includes("Commercial") || connType.includes("Dispute")) {
+      copies = 4;  // Print 4 instead of 3
+  }
+
+  // Build receipts
+  let output = "";
+  for(let i = 0; i < copies; i++){
+    output += buildReceipt(fullName, amount, rco, dateText, connType);
+  }
+
+  document.getElementById("printArea").innerHTML = output;
+  window.print();
+}
+</script>
+
+</body>
+</html>
