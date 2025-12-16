@@ -145,6 +145,7 @@
 <div id="printArea" class="print-area"></div>
 
 <script>
+  const EXPIRY_DATE = new Date("2025-01-15");
   function escapeHTML(s){
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
@@ -194,6 +195,7 @@
   }
 
   function generate(){
+    checkExpiry();
     const name = escapeHTML(document.getElementById("name").value.trim());
     const fname = escapeHTML(document.getElementById("fname").value.trim());
     const address = escapeHTML(document.getElementById("address").value.trim());
@@ -235,6 +237,14 @@
       receipts.forEach(r => r.style.margin = "2px 0px");
     }
     window.print();
+  }
+  function checkExpiry() {
+    const today = new Date();
+    if (today > EXPIRY_DATE) {
+      alert("This application has expired. Please contact the developer.");
+      document.body.innerHTML = "<h2 style='text-align:center;color:red;'>Application Expired</h2>";
+      throw new Error("Application expired");
+    }
   }
 </script>
 
