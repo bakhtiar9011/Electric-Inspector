@@ -63,7 +63,7 @@
   /* --- Receipt styling remains unchanged --- */
   .receipt {
     width: 760px;                 /* Reduced width to fit page */
-    margin-bottom:12px;           /* Reduced spacing */
+    margin:60px 0px;           /* Reduced spacing */
     font-size:15px;
     line-height:1.05rem;          /* Tighter lines so 3 fit on a page */
   }
@@ -146,93 +146,97 @@
 <div id="printArea" class="print-area"></div>
 
 <script>
-function escapeHTML(s){
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
+  function escapeHTML(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
 
-function buildReceipt(fullName, amount, rco, dateText, connType){
-  return `
-    <div class="receipt" style="padding: 10px 80px;">   <!-- reduced padding -->
+  function buildReceipt(fullName, amount, rco, dateText, connType){
+    return `
+      <div class="receipt" style="padding: 10px 80px;">   <!-- reduced padding -->
 
-      <div><strong>TO</strong></div>
+        <div><strong>TO</strong></div>
 
-      <div class="afterTo" style="padding-left:70px;">
-        <div class="row" style="margin-top:6px;">
-          <div class="left"><strong>THE MANAGER, STATE BANK OF PAKISTAN</strong></div>
-          <div class="right"><strong>PROVINCIAL</strong></div>
+        <div class="afterTo" style="padding-left:70px;">
+          <div class="row" style="margin-top:6px;">
+            <div class="left"><strong>THE MANAGER, STATE BANK OF PAKISTAN</strong></div>
+            <div class="right"><strong>PROVINCIAL</strong></div>
+          </div>
+
+          <div style="margin-top:6px;">
+            <strong>DATED: ${dateText}</strong>
+          </div>
+
+          <div style="margin-top:8px;" class="underline"><strong>${fullName}</strong></div>
+
+          <div style="margin-top:10px;">
+            Received from the bearer the sum of Rs.&nbsp; 
+            <span class="underline"><strong>${amount}/-</strong></span><br>
+            to be credited to Government account under the head: 
+            <span class="underline"><strong>B03031-Reciept for fee payable</strong><br>
+            <strong style="margin-left: 290px;">Under the Electricity Rules, 1937</strong></span><br>
+            on account of:&nbsp;
+            <span class="underline"><strong>${connType}</strong></span>
+          </div>
+
+          <div style="margin-top:10px;">
+            <span>RCO Code:</span>
+            &nbsp; <span class="underline"><strong>${rco}</strong></span>
+          </div>
+
+          <div class="signature-block">
+            Signature and full official designation of the<br>
+            Officer ordering the money to be paid in.
+          </div>
+
+          <hr class="line">
         </div>
-
-        <div style="margin-top:6px;">
-          <strong>DATED: ${dateText}</strong>
-        </div>
-
-        <div style="margin-top:8px;" class="underline"><strong>${fullName}</strong></div>
-
-        <div style="margin-top:10px;">
-          Received from the bearer the sum of Rs.&nbsp; 
-          <span class="underline"><strong>${amount}/-</strong></span><br>
-          to be credited to Government account under the head: 
-          <span class="underline"><strong>B03031-Reciept for fee payable</strong><br>
-          <strong style="margin-left: 290px;">Under the Electricity Rules, 1937</strong></span><br>
-          on account of:&nbsp;
-          <span class="underline"><strong>${connType}</strong></span>
-        </div>
-
-        <div style="margin-top:10px;">
-          <span>RCO Code:</span>
-          &nbsp; <span class="underline"><strong>${rco}</strong></span>
-        </div>
-
-        <div class="signature-block">
-          Signature and full official designation of the<br>
-          Officer ordering the money to be paid in.
-        </div>
-
-        <hr class="line">
       </div>
-    </div>
-  `;
-}
-
-function generate(){
-  const name = escapeHTML(document.getElementById("name").value.trim());
-  const fname = escapeHTML(document.getElementById("fname").value.trim());
-  const address = escapeHTML(document.getElementById("address").value.trim());
-  const amount = escapeHTML(document.getElementById("amount").value.trim());
-  const rco = escapeHTML(document.getElementById("rco").value.trim());
-
-  const fullName = `${name} s/o ${fname}, ${address}`;
-
-  const connType = document.querySelector('input[name="ctype"]:checked').value;
-
-  // Auto date
-  const useDate = document.getElementById("useDate").checked;
-  const today = new Date();
-  const formatted = 
-        String(today.getDate()).padStart(2,'0') + "/" +
-        String(today.getMonth()+1).padStart(2,'0') + "/" +
-        today.getFullYear();
-
-  const dateText = useDate ? formatted : "____/____/202_";
-
-  // ---------------------------
-  // NEW: Decide number of receipts
-  // ---------------------------
-  let copies = 3;
-
-  if (connType.includes("Commercial") || connType.includes("Dispute")) {
-      copies = 4;  // Print 4 instead of 3
+    `;
   }
 
-  // Build receipts
-  let output = "";
-  for(let i = 0; i < copies; i++){
-    output += buildReceipt(fullName, amount, rco, dateText, connType);
-  }
+  function generate(){
+    const name = escapeHTML(document.getElementById("name").value.trim());
+    const fname = escapeHTML(document.getElementById("fname").value.trim());
+    const address = escapeHTML(document.getElementById("address").value.trim());
+    const amount = escapeHTML(document.getElementById("amount").value.trim());
+    const rco = escapeHTML(document.getElementById("rco").value.trim());
 
-  document.getElementById("printArea").innerHTML = output;
-  window.print();
-}
+    const fullName = `${name} s/o ${fname}, ${address}`;
+
+    const connType = document.querySelector('input[name="ctype"]:checked').value;
+
+    // Auto date
+    const useDate = document.getElementById("useDate").checked;
+    const today = new Date();
+    const formatted = 
+          String(today.getDate()).padStart(2,'0') + "/" +
+          String(today.getMonth()+1).padStart(2,'0') + "/" +
+          today.getFullYear();
+
+    const dateText = useDate ? formatted : "____/____/202_";
+
+    // ---------------------------
+    // NEW: Decide number of receipts
+    // ---------------------------
+    let copies = 3;
+
+    if (connType.includes("Commercial") || connType.includes("Dispute")) {
+        copies = 4;  // Print 4 instead of 3
+    }
+
+    // Build receipts
+    let output = "";
+    for(let i = 0; i < copies; i++){
+      output += buildReceipt(fullName, amount, rco, dateText, connType);
+    }
+
+    document.getElementById("printArea").innerHTML = output;
+    const receipts = document.querySelectorAll(".receipt");
+    if (receipts.length && copies > 3) {
+      receipts.forEach(r => r.style.margin = "2px 0px");
+    }
+    window.print();
+  }
 </script>
 
 </body>
